@@ -190,5 +190,24 @@ let blueOverlayFilter = coloredOverlay(UIColor.blueColor()) -|- compositeSourceO
 
 // Chapter 4
 
+let x:Any = "hello"
+let g:String? = "hldlfd"
 
+let f = g ?? "nothing"
+
+// Chapter 5
+
+// Use enums and associated values to provide bounds of the 'type' of values a result can have.
+// Generic enums can provide flexible success, errors of any type. Death to magic strings!
+
+//Use enums and associated values to provide bounds on the 'type' of values a result can have. Generic enums can provide flexible success, errors of any type. No more magic strings! Dummy values are not 'rich' types; they have no place in a functional programming world.
+
+enum Result<T> {
+    case Success(T)
+    case Failure(NSError)
+}
+
+// The 'void' generic type can be created via blah<()> which means no associated value for .Success
+
+let thing = blah.Success("HELLO")
 
