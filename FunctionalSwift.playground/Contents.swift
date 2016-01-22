@@ -343,3 +343,28 @@ extension BinarySearchTree {
         }
     }
 }
+
+
+// Why not use an enum ? Because tries can have N-many edges. Enums are for known quantities.
+// Functional Trie data structure
+// Tries can have mult edges from a single node
+
+struct Trie<Element:Hashable> {
+    let isElement:Bool // determines if it is a leaf.
+    let children : [Element:Trie<Element>]
+    
+    init() {
+        isElement = false
+        children = [:]
+    }
+}
+
+// Flattens a Trie into an array containing array of each edge
+extension Trie {
+    var elements: [[Element]] {
+        var result: [[Element]] = isElement ? [[]] : []
+        for (key, value) in children {
+            result += value.elements.map { [key] + $0 } }
+        return result
+    }
+}
