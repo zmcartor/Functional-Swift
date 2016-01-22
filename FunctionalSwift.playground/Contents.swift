@@ -350,12 +350,26 @@ extension BinarySearchTree {
 // Tries can have mult edges from a single node
 
 struct Trie<Element:Hashable> {
-    let isElement:Bool // determines if it is a leaf.
-    let children : [Element:Trie<Element>]
+    var isElement:Bool // determines if it is a leaf.
+    var children:[Element:Trie<Element>]
     
     init() {
         isElement = false
         children = [:]
+    }
+    
+    init(isElement:Bool , children:[Element:Trie<Element>]) {
+        self.isElement = isElement
+        self.children = children
+    }
+}
+
+// This is like Lisp car,cdr
+extension Array {
+    var decompose:(Element, [Element])? {
+        if isEmpty { return .None }
+        
+        return (self[startIndex] , Array(self.dropFirst()))
     }
 }
 
@@ -369,12 +383,14 @@ extension Trie {
     }
 }
 
-// This is like Lisp car,cdr
-extension Array {
-    var decompose:(Element, [Element])? {
-        if isEmpty { return .None }
-        
-        return (self[startIndex] , Array(self.dropFirst()))
+extension Trie where Element:Hashable {
+    init(list:[Element]) {
+        if let (head, tail) = list.decompose {
+            let children = [head:Trie(list:tail)]
+            self = Trie(isElement: false, children: children)
+        } else {
+            self = Trie(isElement:true, children:[:])
+        }
     }
 }
 
@@ -400,4 +416,24 @@ extension Trie {
         return subtrie.lookup(tail)
     }
 }
+
+// Returns the trie matching a specific prefix
+extension Trie {
+    func withPrefix(prefix:[Element]) -> Trie<Element>? {
+        
+        // base case, reached the end
+        guard let (head, tail) = prefix.decompose else { return self }
+        guard let remainder = children[head] else {return .None}
+        // recurse down the tree. Very cool! Much more elegant that procedural version
+        return remainder.withPrefix(tail)
+    }
+    
+    // To autocomplete, call withPrefix and return it's elements
+    
+    // basically returns an array of Tries
+    func autocomplete(elms:[Element]) -> [[Element]] {
+        return self.withPrefix(elms)?.elements ?? []
+    }
+}
+
 
