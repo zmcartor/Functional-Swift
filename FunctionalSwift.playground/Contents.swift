@@ -209,5 +209,137 @@ enum Result<T> {
 
 // The 'void' generic type can be created via blah<()> which means no associated value for .Success
 
-let thing = blah.Success("HELLO")
+let thing = Result.Success("HELLO")
 
+// Purely Functional Data Structures
+
+// By using 'indirect' this becomes a recursive datastructure.
+
+// Associated values are either nothing (leaf) or recurse into two separate trees
+
+// associated values can be accessed via swtich or 'if case ' statements
+
+indirect enum BinarySearchTree<Element:Comparable> {
+    case Leaf
+    case Node(BinarySearchTree<Element> , Element , BinarySearchTree<Element>)
+    
+    init() {
+        self = .Leaf
+    }
+    
+    init(value:Element) {
+        self = .Node(.Leaf , value , .Leaf)
+    }
+}
+
+// TIP - Element could be anything! Structs, whatever can conform to 'comparable'
+
+let leaf:BinarySearchTree<Int> = .Leaf
+let oneTree:BinarySearchTree<Int> = .Node(leaf , 5 , leaf)
+
+// As with tree data structures, many of the methods written on trees will be recursive.
+// Use a 'self' switch to check out the type of an enum. Neat!
+
+// recursively count the size of a search tree
+extension BinarySearchTree {
+    var count:Int {
+        switch self {
+        case .Leaf:
+            return 0
+        case let .Node(left , _ , right):
+            return 1 + left.count + right.count
+        }
+    }
+    
+    var elements:[Element] {
+        switch self {
+        case .Leaf:
+            return []
+        case let .Node(left,x,right):
+            return left.elements + [x] + right.elements
+        }
+        
+    }
+}
+
+// Pretty dope use of 'where' operator.
+extension SequenceType {
+    
+    func all(predicate: (Generator.Element) -> Bool ) -> Bool {
+        for x in self where !predicate(x) {
+            return false
+        }
+        return true
+    }
+    
+}
+
+
+// Determine is a tree meets requirements to be a binary search tree
+
+extension BinarySearchTree where Element:Comparable {
+    var isBST:Bool {
+        
+        switch self {
+        case .Leaf:
+            return true
+        
+        case let .Node(left, x, right):
+            return left.elements.all { y in y < x } &&
+                right.elements.all { z in z > x } &&
+                left.isBST &&
+                right.isBST
+        }
+    }
+}
+
+
+// Binary tree 'contains' using switch pattern matching :o
+
+extension BinarySearchTree {
+    func contains(elm:Element) -> Bool {
+        
+        switch self {
+        case .Leaf:
+            return false
+        
+        case let .Node(_,y,_) where elm == y:
+            return true
+            
+        case let .Node(left,y,_) where elm < y:
+            return left.contains(elm)
+        
+        case let .Node(_,y,right) where elm > y:
+            return right.contains(elm)
+        default:
+            fatalError("nope!")
+        }
+        
+    }
+}
+
+
+// Insertion into the tree. Trick is to keep recursing down the tree. 
+// Imagine simplist case, then recurse
+
+extension BinarySearchTree {
+    mutating func insert(elm:Element) {
+        switch self {
+        case .Leaf:
+            return self = BinarySearchTree(value: elm)
+        case .Node(var left , let y , var right):
+            if elm < y {
+                left.insert(elm)
+            }
+            
+            else if elm > y {
+                right.insert(elm)
+            }
+            
+                // equal return the original tree
+            else {
+               return self = .Node(left, elm , right)
+            }
+        }
+    }
+}
