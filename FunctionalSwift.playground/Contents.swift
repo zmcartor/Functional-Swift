@@ -368,3 +368,21 @@ extension Trie {
         return result
     }
 }
+
+// This is like Lisp car,cdr
+extension Array {
+    var decompose:(Element, [Element])? {
+        if isEmpty { return .None }
+        
+        return (self[startIndex] , Array(self.dropFirst()))
+    }
+}
+
+// check it out , 'sum' can be written without a loop recursively
+
+func sum(arr:[Int]) -> Int {
+    // tuple decomposition here, nice..
+    guard let (head,tail) = arr.decompose else { return 0 }
+    return head+sum(tail)
+}
+
