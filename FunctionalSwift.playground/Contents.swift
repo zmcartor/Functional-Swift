@@ -386,3 +386,18 @@ func sum(arr:[Int]) -> Int {
     return head+sum(tail)
 }
 
+// We can use decompose to lookup items in the trie. We lookup an array of 'Elements'
+// such as array of characters as a string
+
+extension Trie {
+    func lookup(key:[Element]) -> Bool {
+        // isElement determines whether the branch is a stopping point. Such as as inserting
+        // cat and catch . The 't' and 'h' are elements.
+        guard let (head, tail) = key.decompose else { return isElement }
+        
+        // go down into the next trie and try to find a match
+        guard let subtrie = children[head] else { return false }
+        return subtrie.lookup(tail)
+    }
+}
+
